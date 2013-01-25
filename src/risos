@@ -243,49 +243,49 @@ cria_rec() {
 linux_criado() {
 
   	    zenity --title="Atenção" \
-            --warning --text="Imagem do Linux criada com sucesso!"
+            --info --text="Imagem do Linux criada com sucesso!"
 }
 
 #Notificação para imagem criada com sucesso
 windows_criado() {
 
   	    zenity --title="Atenção" \
-            --warning --text="Imagem do Windows criada com sucesso!"
+            --info --text="Imagem do Windows criada com sucesso!"
 }
 
 #Notificação para imagem criada com sucesso
 rec_criado() {
 
   	    zenity --title="Atenção" \
-            --warning --text="Imagem de recuperação criada com sucesso!"
+            --info --text="Imagem de recuperação criada com sucesso!"
 }
 
 #Notificação para imagens criadas com sucesso
 imagens_criadas() {
 
   	    zenity --title="Atenção" \
-            --warning --text="Imagens criadas com sucesso!"
+            --info --text="Imagens criadas com sucesso!"
 }
 
 #Notificação para torrent criado com sucesso
 torrent_linux_criado() {
 
 	     zenity --title="Atenção" \
-            --warning --text="Torrent do Linux criado com sucesso!"
+            --info --text="Torrent do Linux criado com sucesso!"
 }
 
 #Notificação para torrent criado com sucesso
 torrent_windows_criado() {
 
 	     zenity --title="Atenção" \
-            --warning --text="Torrent do Windows criado com sucesso!"
+            --info --text="Torrent do Windows criado com sucesso!"
 }
 
 #Notificação para torrent criado com sucesso
 torrents_criados() {
 
  	     zenity --title="Atenção" \
-            --warning --text="Torrent do Windows e Linux criados com sucesso!"
+            --info --text="Torrent do Windows e Linux criados com sucesso!"
 }
 
 #Cria um livecd do SO com o R.I.S.O instalado.
@@ -315,7 +315,7 @@ livecd() {
     chmod +x /etc/rc.local
     
     zenity --title="Atenção" \
-    --warning --text="Arquivo de imagem criado com sucesso em:\n
+    --info --text="Arquivo de imagem criado com sucesso em:\n
 /home/remastersys/riso0.5.iso.\n\n
 Para garava-lo em um CD/DVD tente:\n
 cdrecord -v -fs=16M speed=32 dev=1,0,0 -data /home/remastersys/riso0.5.iso\n\n
