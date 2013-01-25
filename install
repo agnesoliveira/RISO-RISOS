@@ -8,7 +8,7 @@ dep_cli="avahi-utils rtorrent screen ntfsprogs ssh git-core"
 dep_ser="avahi-utils avahi-daemon bittorrent rtorrent screen ntfsprogs grub2 ssh coreutils mkisofs genisoimage findutils bash passwd sed squashfs-tools casper rsync mount eject libdebian-installer4 os-prober ubiquity user-setup discover1 discover laptop-detect syslinux xterm util-linux xresprobe cdrecord git-core"
 
 menu() {
-    apt-get install -y dialog
+    apt-get install -y dialog zenity
             opcao=$(zenity --width=400 --height=400 --text="Instalação do RISO" --list --checklist --column " " --column "Opcoes" TRUE RISOS TRUE RISO)
 	# De acordo com a opção escolhida, executa funcoes
 	case $opcao in
@@ -82,7 +82,9 @@ instala_risos() {
     
     #Pega partições
     partrec=`df -T | awk 'NR==2{print $1}'`
-    partwindows=`os-prober | grep Windows | cut -d':' -f1`
+#    partwindows=`os-prober | grep Windows | cut -d':' -f1`
+    partwindows=`blkid | grep ntfs | head -n1 | awk -F: {'print $1'}`
+    partwindows2=`blkid | grep ntfs | grep -v ${partwindows} | head -n1 | awk -F: {'printf $1'}`	
     partlinux=`os-prober | grep linux | cut -d':' -f1`
     partswap=`blkid | grep swap | grep -v ram | cut -d':' -f1`
     
@@ -90,6 +92,7 @@ instala_risos() {
     sa_partrec=`df -T | awk 'NR==2{print $2}'`
     sa_partlinux=`blkid ${partlinux} | cut -d'"' -f4`
     sa_partwindows=`blkid ${partwindows} | cut -d'"' -f4`
+    sa_partwindows2=`blkid ${partwindows2} | cut -d'"' -f4`
     
     #Prepara grub2
     sed s/'GRUB_DEFAULT=0'/'GRUB_DEFAULT=1'/g -i /etc/default/grub
@@ -119,7 +122,7 @@ instala_risos() {
     echo '' >> /etc/avahi/services/riso.service
     echo '  <service>' >> /etc/avahi/services/riso.service
     echo '    <!--Nome do serviço-->' >> /etc/avahi/services/riso.service
-    echo "    <type>_RISO._tcp</type>" >> /etc/avahi/services/riso.service
+    echo "    <type>_RISOdecom._tcp</type>" >> /etc/avahi/services/riso.service
     echo '' >> /etc/avahi/services/riso.service
     echo '    <!--Campo não é usado-->' >> /etc/avahi/services/riso.service
     echo '    <port>1234</port>' >> /etc/avahi/services/riso.service
@@ -128,6 +131,7 @@ instala_risos() {
     echo "    <txt-record>sa_partrec=${sa_partrec}</txt-record>" >> /etc/avahi/services/riso.service
     echo "    <txt-record>sa_partlinux=${sa_partlinux}</txt-record>" >> /etc/avahi/services/riso.service
     echo "    <txt-record>sa_partwindows=${sa_partwindows}</txt-record>" >> /etc/avahi/services/riso.service
+    echo "    <txt-record>sa_partwindows2=${sa_partwindows2}</txt-record>" >> /etc/avahi/services/riso.service
     echo '' >> /etc/avahi/services/riso.service
     echo '    <!--Variáveis com tamanho das imagens geradas no servidor-->' >> /etc/avahi/services/riso.service
     echo '    <txt-record>tamlinux=123456789</txt-record>' >> /etc/avahi/services/riso.service
@@ -138,6 +142,7 @@ instala_risos() {
     echo "    <txt-record>partrec=${partrec}</txt-record>" >> /etc/avahi/services/riso.service
     echo "    <txt-record>partlinux=${partlinux}</txt-record>" >> /etc/avahi/services/riso.service
     echo "    <txt-record>partwindows=${partwindows}</txt-record>" >> /etc/avahi/services/riso.service
+    echo "    <txt-record>partwindows2=${partwindows2}</txt-record>" >> /etc/avahi/services/riso.service
     echo '' >> /etc/avahi/services/riso.service
     echo '  </service>' >> /etc/avahi/services/riso.service
     echo '</service-group>' >> /etc/avahi/services/riso.service
