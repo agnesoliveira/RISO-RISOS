@@ -590,19 +590,19 @@ iwindows=0
 iwindows2=0
 ilinux=0
 
-if [ grep "Windows1" <<< ${opcao} ]
+if grep "Windows1" <<< ${opcao}
 then
 instala_windows &&\
 iwindows=1;
 fi
 
-if [ grep "Windows2" <<< ${opcao} ]
+if grep "Windows2" <<< ${opcao}
 then
 instala_windows2 &&\
 iwindows2=1;
 fi
 
-if [ grep "Linux" <<< ${opcao} ]
+if grep "Linux" <<< ${opcao}
 then
 instala_linux &&\
 ilinux=1;
@@ -631,19 +631,19 @@ iwindows=0
 iwindows2=0
 ilinux=0
 
-if [ grep "Windows1" <<< ${opcao} ]
+if grep "Windows1" <<< ${opcao}
 then
 baixa_imagem_windows &&\
 iwindows=1;
 fi
 
-if [ grep "Windows2" <<< ${opcao} ]
+if grep "Windows2" <<< ${opcao}
 then
 baixa_imagem_windows2 &&\
 iwindows2=1;
 fi
 
-if [ grep "Linux" <<< ${opcao} ]
+if grep "Linux" <<< ${opcao}
 then
 baixa_imagem_linux &&\
 ilinux=1;
