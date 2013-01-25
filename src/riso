@@ -27,7 +27,7 @@ log(){
 #Carrega variaveis disponibilizadas pelo avahi para variáveis do sistema.
 carrega_variaveis() {
 
-    avahi_saida=`avahi-browse -rtp _RISO._tcp | grep '='`
+    avahi_saida=`avahi-browse -rtp _RISOdecom._tcp | grep '='`
     servidor=`cut -d ';' -f8 <<< ${avahi_saida}` #ip do servidor.
     if [ -z $servidor ]; then
         zenity --title="Atenção" \

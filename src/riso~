@@ -271,7 +271,7 @@ baixa_imagens() {
 		    # qual a porcentagem do total?
 		    PORCENTAGEM=$((copiado*100/total))
 		
-		    # envia a porcentagem para o dialog
+		    # envia a porcentagem para o zenity
 		    echo $PORCENTAGEM
 		
 		    # aguarda até a próxima checagem
@@ -338,7 +338,7 @@ baixa_imagem_windows() {
 		    # qual a porcentagem do total?
 		    PORCENTAGEM=$((sizelocwin*100/tamwindows))
 		
-		    # envia a porcentagem para o dialog
+		    # envia a porcentagem para o zenity
 		    echo $PORCENTAGEM
 		
 		    # aguarda até a próxima checagem
@@ -406,7 +406,7 @@ baixa_imagem_linux() {
 		    # qual a porcentagem do total?
 		    PORCENTAGEM=$((sizeloclin*100/tamlinux))
 		
-		    # envia a porcentagem para o dialog
+		    # envia a porcentagem para o zenity
 		    echo $PORCENTAGEM
 		
 		    # aguarda até a próxima checagem
@@ -515,7 +515,7 @@ menu_baixa_imagens() {
 #Menu principal.
 menu() {
         while : ; do
-        opcao="$(zenity --width=400 --height=400 --list --column "RISO - 0.5" \
+        opcao=$(zenity --width=400 --height=400 --list --column "RISO - 0.5" \
                 --title="Menu" \
               "Instalar imagens ja existentes"   \
                "Baixar e instalar novas imagens"  \
@@ -523,7 +523,7 @@ menu() {
                      "Atualiza"                  \
                      "Configurações"             \
                      "Creditos"                   \
-                      "Help"                    \ )"
+                      "Help"                     )
 
                 # ESC, sai do programa...
                 [ $? -ne 0 ] && break
