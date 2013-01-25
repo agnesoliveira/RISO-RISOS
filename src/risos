@@ -9,6 +9,7 @@ img_win2=$dir_img/windows.img
 img_lin=$dir_img/linux.tar
 img_rec=$dir_img/rec.tar
 tor_win=$img_win.torrent
+tor_win2=$img_win2.torrent
 tor_lin=$img_lin.torrent
 riso_service=/etc/avahi/services/riso.service
 arq_var=$dir_riso/riso.vars
@@ -107,6 +108,7 @@ source $arq_var
     
     #Atualiza arquivo de variaveis.
     echo 'partwindows='$partwindows > $riso_part
+    echo 'partwindows2='$partwindows2 > $riso_part
     echo 'partlinux='$partlinux >> $riso_part
     echo 'sa_partwindows='$sa_partwindows >> $riso_part
     echo 'sa_partwindows2='$sa_partwindows2 >> $riso_part
@@ -115,18 +117,60 @@ source $arq_var
 
 #Inicia tracker para disponibilizar imagens na rede.
 inicia_servidor() {
+torrents=""
+#Pega os parametros e passa pra $value
+value=$*
+#Vai criando a variável $torrent com todos os torrents
+erro=0
+continua=0
+if grep "Linux" <<< ${value} >> /dev/null
+then
+if [ -e ${img_lin} ] 
+then
+torrents=$torrents" "$tor_lin
+continua=1
+else
+erro=1
+fi
+fi
 
-	if [ -e ${img_win} -a -e ${img_lin} ]; then
-	    log "Tracker iniciado para Windows e Linux."
+if grep "Windows1" <<< ${value} >> /dev/null
+then
+if [ -e ${img_win} ] 
+then
+torrents=$torrents" "$tor_win
+continua=1
+else
+erro=1
+fi
+fi
+
+if grep "Windows2" <<< ${value} >> /dev/null
+then
+if [ -e ${img_win} ] 
+then
+torrents=$torrents" "$tor_win2
+continua=1
+else
+erro=1
+fi
+fi
+
+
+	if [ $erro == 0 ]; then
+		if [ $continua == 1 ]; then
+	    log "Tracker iniciado para as imagens."
 		bttrack --port 6969 --dfile dstate | grep laialadaiasabadanaavemaria &
 		cd ${dir_img}	
-		rtorrent ${tor_lin} ${tor_win}
-		log "Tracker finalizado para Windows e Linux."
+		rtorrent ${torrents}
+		log "Tracker finalizado para as imagens."
+	fi
 	else
+		
  	        zenity --title="Atenção" \
                 --warning --text="Não existem imagens prontas."
 		
-		log "ERRO: Ao iniciar tracker para Windows e Linux, Não existem imagens prontas."
+		log "ERRO: Ao iniciar tracker, não existe alguma das imagens."
 		return 2
 	fi
 	
@@ -140,6 +184,24 @@ inicia_servidor_windows() {
 		bttrack --port 6969 --dfile dstate | grep laialadaiasabadanaavemaria &
 		cd ${dir_img}
 		rtorrent ${tor_win}
+		log "Tracker finalizado para Windows."
+	else
+	        zenity --title="Atenção" \
+                --warning --text="Você ainda não criou a imagem do windows!"
+
+		log "ERRO: Ao iniciar tracker para Windows, Não existe imagem pronta."
+		return 2
+	fi
+	
+}
+
+inicia_servidor_windows2() {
+
+	if [ -e ${img_win} ]; then
+    	log "Tracker iniciado para Windows."
+		bttrack --port 6969 --dfile dstate | grep laialadaiasabadanaavemaria &
+		cd ${dir_img}
+		rtorrent ${tor_win2}
 		log "Tracker finalizado para Windows."
 	else
 	        zenity --title="Atenção" \
@@ -248,6 +310,39 @@ pode estar incorreta.\n" \
 	
 }
 
+#Cria imagem do Windows.
+cria_windows2() {
+	
+	log "Criando imagem do Windows2."
+	echo "Removendo imagem antiga do windows2..."
+	rm -f ${img_win2}
+    rm -f ${tor_win2}
+
+    #Cria arquivo .img do windows
+    umount ${partwindows2} 2> /dev/null
+    ntfsclone -s -O ${img_win2} ${partwindows2}
+    
+    #Se não conseguiu criar a imagem
+    if [ "$?" -ne "0" ]; then
+        zenity --title="Atenção" \
+        --warning --text="Não consegui criar uma imagem do Windows2.\n
+O sistema operacional pode ainda não ter sido instalado.\n
+A partição ou o sistema de arquivo indicados pelas variáveis\n
+partwindows2 e sa_partwindows2 em /usr/riso/riso.vars\n
+pode estar incorreta.\n" \
+       
+        log "ERRO: Ao criar imagem do Windows, ntfsclone falhou ao criar arquivo windows.img."
+        return 3
+    fi
+    #Atualiza Sistema de arquivo da partição no riso.service
+	sa_partwindows=`blkid ${partwindows2} | cut -d'"' -f4`
+	sed "s/sa_partwindows=[^<]*/sa_partwindows=${sa_partwindows2}/" < ${arq_var} > ${arq_var}.tmp
+	mv ${arq_var}.tmp ${arq_var}
+	log "Imagem do Windows criada."
+	
+}
+
+
 #Cria arquivo .torrent para imagem do linux.
 cria_torrent_windows() {
 	
@@ -310,6 +405,13 @@ windows_criado() {
 }
 
 #Notificação para imagem criada com sucesso
+windows2_criado() {
+
+  	    zenity --title="Atenção" \
+            --info --text="Imagem do Windows2 criada com sucesso!"
+}
+
+#Notificação para imagem criada com sucesso
 rec_criado() {
 
   	    zenity --title="Atenção" \
@@ -341,7 +443,7 @@ torrent_windows_criado() {
 torrents_criados() {
 
  	     zenity --title="Atenção" \
-            --info --text="Torrent do Windows e Linux criados com sucesso!"
+            --info --text="Torrents criados com sucesso!"
 }
 
 #Cria um livecd do SO com o R.I.S.O instalado.
@@ -903,49 +1005,106 @@ iso (){
 
 #Checklist de seleção.
 menu_inicia_servidor() {
-
-	opcao=$(zenity --width=400 --height=400 --text="Quais imagens deseja disponibilizar?" --list --checklist --column " " --column "Opcoes" TRUE Windows TRUE Linux)
-
+opcao=""
+	opcao=$(zenity --width=400 --height=400 --text="Quais imagens deseja disponibilizar?" --list --checklist --column " " --column "Opcoes" TRUE Windows1 TRUE Windows2 TRUE Linux)
 	# De acordo com a opção escolhida, executa funcoes
-	case $opcao in
-		"Windows") inicia_servidor_windows;;
-		"Linux") inicia_servidor_linux;;
-		"Windows|Linux") inicia_servidor;;
-	esac
+	inicia_servidor $opcao
+	#case $opcao in
+	#	"Windows") inicia_servidor_windows;;
+	#	"Linux") inicia_servidor_linux;;
+	#	"Windows|Linux") inicia_servidor;;
+	#esac
 	
 }
 
 #Checklist de seleção.
  menu_criar_imagens() {
 
-    opcao=$(zenity --text="Quais imagens deseja criar:" --list --checklist --column "Sel" --column "Opcoes" TRUE Linux TRUE Windows FALSE Recuperacao )
+    opcao=$(zenity --text="Quais imagens deseja criar:" --list --checklist --column "Sel" --column "Opcoes" TRUE Linux TRUE Windows1 TRUE Windows2 FALSE Recuperacao )
 
+
+# De acordo com a opção escolhida, executa funcoes
+awindows=0
+awindows2=0
+alinux=0
+arec=0
+
+if grep "Windows1" <<< ${opcao}
+then
+cria_windows &&\
+awindows=1;
+fi
+
+if grep "Windows2" <<< ${opcao}
+then
+cria_windows2 &&\
+awindows2=1;
+fi
+
+if grep "Linux" <<< ${opcao}
+then
+cria_linux &&\
+alinux=1;
+fi
+
+if grep "Recuperacao" <<< ${opcao}
+then
+cria_recuperacao &&\
+arec=1;
+fi
+
+[[ $awindows == 1 && $awindows2 == 1 && $alinux == 1 && $arec=1 ]] && imagens_criadas
 
     # De acordo com a opção escolhida, executa funcoes
-    case $opcao in
-        "Windows") cria_windows && cria_torrent_windows && windows_criado;;
-        "Linux") cria_linux && cria_torrent_linux && linux_criado;;
-        "Recuperacao") cria_rec && rec_criado;;
-        "Linux|Windows") cria_windows && cria_torrent_windows && cria_linux && cria_torrent_linux && imagens_criadas;;
-        "Windows|Recuperacao") cria_rec && cria_windows && cria_torrent_windows && imagens_criadas;;
-        "Linux|Recuperacao") cria_rec && cria_linux && cria_torrent_linux && imagens_criadas;;
-        "Linux|Windows|Recuperacao") cria_rec && cria_windows && cria_torrent_windows && cria_linux && cria_torrent_linux && imagens_criadas;;
-    esac
+#    case $opcao in
+ #       "Windows") cria_windows && cria_torrent_windows && windows_criado;;
+  #      "Linux") cria_linux && cria_torrent_linux && linux_criado;;
+   #     "Recuperacao") cria_rec && rec_criado;;
+    #    "Linux|Windows") cria_windows && cria_torrent_windows && cria_linux && cria_torrent_linux && imagens_criadas;;
+     #   "Windows|Recuperacao") cria_rec && cria_windows && cria_torrent_windows && imagens_criadas;;
+      #  "Linux|Recuperacao") cria_rec && cria_linux && cria_torrent_linux && imagens_criadas;;
+       # "Linux|Windows|Recuperacao") cria_rec && cria_windows && cria_torrent_windows && cria_linux && cria_torrent_linux && imagens_criadas;;
+    #esac
     
 } 
 
 #Checklist de seleção.
 menu_criar_torrents() {
 
-    opcao=$(zenity --width=400 --height=400 --text="Quais imagens deseja disponibilizar?" --list --checklist --column " " --column "Opcoes" TRUE Windows TRUE Linux)
+    opcao=$(zenity --width=400 --height=400 --text="Quais imagens deseja disponibilizar?" --list --checklist --column " " --column "Opcoes" TRUE Windows1 TRUE Windows2 TRUE Linux)
 
+
+# De acordo com a opção escolhida, executa funcoes
+awindows=0
+awindows2=0
+alinux=0
+
+if grep "Windows1" <<< ${opcao}
+then
+cria_torrent_windows &&\
+awindows=1;
+fi
+
+if grep "Windows2" <<< ${opcao}
+then
+cria_torrent_windows2 &&\
+awindows2=1;
+fi
+
+if grep "Linux" <<< ${opcao}
+then
+cria_torrent_linux &&\
+alinux=1;
+fi
+
+[[ $awindows == 1 && $awindows2 == 1 && $alinux == 1 ]] && torrents_criados
 
     # De acordo com a opção escolhida, executa funcoes
-	case $opcao in
-		"Windows") cria_torrent_windows && torrent_windows_criado;;
-		"Linux") cria_torrent_linux && torrent_linux_criado;;
-		"Windows|Linux") cria_torrent_windows && cria_torrent_linux && torrents_criados;;
-	esac
+#	case $opcao in
+#		"Windows") cria_torrent_windows && torrent_windows_criado;;
+#		"Linux") cria_torrent_linux && torrent_linux_criado;;
+#		"Windows|Linux") cria_torrent_windows && cria_torrent_linux && torrents_criados;;
+#	esac
 	
 }
 
