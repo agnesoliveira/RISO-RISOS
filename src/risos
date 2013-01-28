@@ -5,7 +5,7 @@
 dir_riso=/usr/riso
 dir_img=$dir_riso/imagens
 img_win=$dir_img/windows.img
-img_win2=$dir_img/windows.img
+img_win2=$dir_img/windows2.img
 img_lin=$dir_img/linux.tar
 img_rec=$dir_img/rec.tar
 tor_win=$img_win.torrent
