@@ -41,7 +41,7 @@ carrega_variaveis() {
         exit 1
     fi
 
-(scp -o StrictHostKeyChecking=no root@${servidor}:${arq_var} ${arq_var} && source $arq_var) || echo "Não foi possível carregar arquivo com variáveis"
+(scp -o StrictHostKeyChecking=no root@${servidor}:${arq_var} ${arq_var} && sleep 2; source $arq_var) || echo "Não foi possível carregar arquivo com variáveis"
 
 #    partwindows=`(cut -d ';' -f10 | cut -d '"' -f2 | cut -d '=' -f2) <<< ${avahi_saida}` #Partição com Windows.
 #    partlinux=`(cut -d ';' -f10 | cut -d '"' -f4 | cut -d '=' -f2) <<< ${avahi_saida}` #Partição com Linux.
@@ -51,7 +51,7 @@ carrega_variaveis() {
     #Tamanho total das imagens criadas no servidor.
 #    tamwindows=`(cut -d ';' -f10 | cut -d '"' -f10 | cut -d '=' -f2) <<< ${avahi_saida}`
 #    tamlinux=`(cut -d ';' -f10 | cut -d '"' -f12 | cut -d '=' -f2) <<< ${avahi_saida}`
-
+source $arq_var
     #Sistema de arquivo das partições.
 #    sa_partwindows=`(cut -d ';' -f10 | cut -d '"' -f14 | cut -d '=' -f2) <<< ${avahi_saida}`
 #    sa_partlinux=`(cut -d ';' -f10 | cut -d '"' -f16 | cut -d '=' -f2) <<< ${avahi_saida}`
@@ -128,7 +128,7 @@ source $arq_var
 	    log "Instalação do Windows finalizada."
 	    update-grub
 	
-	
+	return 1
 	else
        		 zenity --title="Atenção" \
        		 --warning --text="Você ainda não baixou a imagem do Windows"
@@ -157,12 +157,14 @@ source $arq_var
 	
 	    log "Instalação do Windows2 finalizada."
 	    update-grub
+
+return 1
 	
 	
 	else
        		 zenity --title="Atenção" \
        		 --warning --text="Você ainda não baixou a imagem do Windows2"
-
+return 1;	
 		log "ERRO: Imagem do Windows2 ainda não foi baixada."
 		return 5
 	fi
@@ -195,6 +197,7 @@ source $arq_var
 	    log "Instalação do Linux finalizada."
 	    update-grub
 	    
+return 1
 	    
 	else
         	zenity --title="Atenção" \
@@ -275,7 +278,7 @@ baixa_imagens() {
 	screen -d -m rtorrent ${tor_win} ${tor_lin}
 
     	#Se usuário cancelar volta para menu.
-	trap "killall rtorrent; clear; exit" 2 15
+	trap "killall rtorrent; exit" 2 15
 
 	# Loop que aguarda o torrent ser concluido.
 	# Compara o tamanho do arquivo que esta sendo baixado pelo rtorrent
@@ -373,7 +376,7 @@ baixa_imagem_windows() {
 	    echo 100
 	    log "Download do Windows finalizado."
 	    sleep 30
-	
+			return 1;
     ) | zenity --progress --title="Baixando imagem..." --text="Baixando imagem do Windows do servidor RISOS para a maquina local" --auto-close 
 
 	log "Finalizando rtorrent."
@@ -442,7 +445,7 @@ baixa_imagem_windows2() {
 	    echo 100
 	    log "Download do Windows2 finalizado."
 	    sleep 30
-	
+		return 1;	
     ) | zenity --progress --title="Baixando imagem..." --text="Baixando imagem do Windows2 do servidor RISOS para a maquina local" --auto-close 
 
 	log "Finalizando rtorrent."
@@ -457,7 +460,6 @@ baixa_imagem_linux() {
 	log "Iniciando download do Linux."
 	echo "Conectando ao servidor..."
 	carrega_variaveis || return 1
-	
     #Vefifica se imagem já é a mais recente
 	sizeloclin="0"
 	[ -e ${img_lin} ] && sizeloclin=$(du ${img_lin} | cut -f1)
@@ -511,6 +513,7 @@ baixa_imagem_linux() {
 	    echo 100
 	    log "Download do Linux finalizado."
 	    sleep 30
+	    return 1;	
     ) | zenity --progress --title="Baixando imagem..." --text="Baixando imagem do Linux do servidor RISOS para a maquina local" --auto-close
 
 	log "Finalizando rtorrent"
@@ -592,20 +595,23 @@ ilinux=0
 
 if grep "Windows1" <<< ${opcao}
 then
-instala_windows &&\
+if instala_windows == 1; then
 iwindows=1;
+fi
 fi
 
 if grep "Windows2" <<< ${opcao}
 then
-instala_windows2 &&\
+if instala_windows2 == 1; then
 iwindows2=1;
+fi
 fi
 
 if grep "Linux" <<< ${opcao}
 then
-instala_linux &&\
+if instala_linux == 1; then
 ilinux=1;
+fi
 fi
 
 #Se instalou qualquer uma das imagens verifica se no arquivo tem 
@@ -633,20 +639,23 @@ ilinux=0
 
 if grep "Windows1" <<< ${opcao}
 then
-baixa_imagem_windows &&\
+if baixa_imagem_windows == 1; then
 iwindows=1;
+fi
 fi
 
 if grep "Windows2" <<< ${opcao}
 then
-baixa_imagem_windows2 &&\
+if baixa_imagem_windows2 == 1; then
 iwindows2=1;
+fi
 fi
 
 if grep "Linux" <<< ${opcao}
 then
-baixa_imagem_linux &&\
+if baixa_imagem_linux == 1; then
 ilinux=1;
+fi
 fi
 
 [[ $iwindows == 1 ]] && instala_windows
