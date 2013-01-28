@@ -310,6 +310,29 @@ pode estar incorreta.\n" \
 	
 }
 
+
+
+#Cria arquivo .torrent para imagem do linux.
+cria_torrent_windows2() {
+
+if [ -e ${img_win2} ]; then
+log "Criando arquivo torrent do windows2."
+        btmakemetafile.bittorrent ${img_win2} http://${servidor}:6969/announce 2> /dev/null
+
+        #Escreve o tamanho da imagem no riso.service
+tam=`du ${img_win2} | cut -f1`
+        sed "s/tamwindows2=[0-9]*/tamwindows2=${tam}/" < ${arq_var} > ${arq_var}.tmp
+mv ${arq_var}.tmp ${arq_var}
+log "Arquivo torrent do windows2 criado."
+    else
+zenity --title="Atenção" \
+            --warning --text="Você ainda não criou a imagem do Windows2!"
+       
+log "ERRO: Ao criar torrent do Windows2, não existe imagem pronta."
+            return 2
+    fi
+}
+
 #Cria imagem do Windows.
 cria_windows2() {
 	
