@@ -128,7 +128,6 @@ source $arq_var
 	    log "Instalação do Windows finalizada."
 	    update-grub
 	
-	return 1
 	else
        		 zenity --title="Atenção" \
        		 --warning --text="Você ainda não baixou a imagem do Windows"
@@ -157,8 +156,6 @@ source $arq_var
 	
 	    log "Instalação do Windows2 finalizada."
 	    update-grub
-
-return 1
 	
 	
 	else
@@ -197,7 +194,6 @@ source $arq_var
 	    log "Instalação do Linux finalizada."
 	    update-grub
 	    
-return 1
 	    
 	else
         	zenity --title="Atenção" \
@@ -595,23 +591,20 @@ ilinux=0
 
 if grep "Windows1" <<< ${opcao}
 then
-if instala_windows == 1; then
+instala_windows &&\
 iwindows=1;
-fi
 fi
 
 if grep "Windows2" <<< ${opcao}
 then
-if instala_windows2 == 1; then
+instala_windows2 &&\
 iwindows2=1;
-fi
 fi
 
 if grep "Linux" <<< ${opcao}
 then
-if instala_linux == 1; then
+instala_linux &&\
 ilinux=1;
-fi
 fi
 
 #Se instalou qualquer uma das imagens verifica se no arquivo tem 
@@ -639,23 +632,20 @@ ilinux=0
 
 if grep "Windows1" <<< ${opcao}
 then
-if baixa_imagem_windows == 1; then
+baixa_imagem_windows &&\
 iwindows=1;
-fi
 fi
 
 if grep "Windows2" <<< ${opcao}
 then
-if baixa_imagem_windows2 == 1; then
+baixa_imagem_windows2 &&\
 iwindows2=1;
-fi
 fi
 
 if grep "Linux" <<< ${opcao}
 then
-if baixa_imagem_linux == 1; then
+baixa_imagem_linux &&\
 ilinux=1;
-fi
 fi
 
 [[ $iwindows == 1 ]] && instala_windows
