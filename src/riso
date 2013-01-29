@@ -402,8 +402,8 @@ baixa_imagem_windows2() {
 	#Deleta imagens antigas.
 	log "Iniciando remoção da imagem antiga do Windows2."
 	echo "Removendo imagem antiga do Windows2..."
-	rm -f ${img_win}
-	rm -f ${tor_win}
+	rm -f ${img_win2}
+	rm -f ${tor_win2}
 	log "Remoção da imagem antiga do Windows2 finalizada."
 
 	#Inicia download da imagen em terminal virtual.
