@@ -33,6 +33,12 @@ creditos() {
                     Gabriel Machado de Castro Fonseca    \n
                       André Luiz Silveira Herculano      \n
                                                          \n
+                    Atualizado por:                      \n
+                            Agnes Oliveira	         \n
+                          Gabriel Dutra Dias              \n
+                      Marcela Leticia C. Januario         \n
+                           Thais Diniz Braz               \n
+                                                         \n
                            www.dgo.cefetmg.br            \n
                                                          \n'\
 
