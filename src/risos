@@ -243,6 +243,8 @@ cria_linux() {
 	#Cria arquivo .tar do linux
 	umount /mnt 2> /dev/null
 	mount ${partlinux} /mnt
+	rm -f /mnt/etc/udev/rules.d/70-persistent-net.rules
+	sleep 1
 	cd /mnt
 	tar -cvf ${img_lin} *
 	
