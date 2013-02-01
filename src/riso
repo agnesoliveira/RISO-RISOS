@@ -579,8 +579,13 @@ baixa_rec() {
 
 #Checklist de seleção.
 menu_instala_imagens() {
-
-            opcao=$(zenity --width=400 --height=400 --text="Quais imagens deseja instalar?" --list --checklist --column " " --column "Opcoes" TRUE Windows1 TRUE Windows2 TRUE Linux)
+source $arq_var
+win2=""
+if [ $partwindows2 ]
+then
+win2="TRUE Windows2"
+fi
+            opcao=$(zenity --width=400 --height=400 --text="Quais imagens deseja instalar?" --list --checklist --column " " --column "Opcoes" TRUE Windows1 $win2 TRUE Linux)
 
 
 # De acordo com a opção escolhida, executa funcoes
@@ -621,8 +626,13 @@ fi
 
 #Checklist de seleção.
 menu_baixa_imagens() {
-
-       opcao=$(zenity --width=400 --height=400 --text="Quais imagens deseja baixar?" --list --checklist --column " " --column "Opcoes" TRUE Windows1 TRUE Windows2 TRUE Linux)
+source $arq_var
+win2=""
+if [ $partwindows2 ]
+then
+win2="TRUE Windows2"
+fi
+       opcao=$(zenity --width=400 --height=400 --text="Quais imagens deseja baixar?" --list --checklist --column " " --column "Opcoes" TRUE Windows1 $win2 TRUE Linux)
 
 	# De acordo com a opção escolhida, executa funcoes
 iwindows=0
