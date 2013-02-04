@@ -1,6 +1,6 @@
 echo "40"
 echo "#Baixando a mais recente versão do riso"
-git clone -b develop http://github.com/gabrieldutra/RISO
+git clone -b develop http://github.com/gabrieldutra/RISO &> /dev/null
 sleep 3
 echo "70"
 echo "#Executando instalação"
