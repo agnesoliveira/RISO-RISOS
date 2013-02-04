@@ -5,7 +5,6 @@ sleep 3
 echo "70"
 echo "#Executando instalação"
 cd RISO
-echo "100"
 sleep 2
 echo "100"
 ./install
