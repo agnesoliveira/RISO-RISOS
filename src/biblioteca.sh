@@ -48,7 +48,7 @@ creditos() {
 #Atualiza R.I.S.O.
 atualiza() {
 (
-	versaoariso=2
+	versaoariso=0
 	log "Verificando atualizações"
 	echo "#Verificando atualizações"
 	rm -rf tmp
@@ -65,10 +65,10 @@ atualiza() {
 	if [ $versaoriso -gt $versaoariso ]
 then
 		#Menssagem de atualizado com sucesso.
-        	zenity --title="Atenção" \
-       	        --info --text="\n  Atualização disponivel.\n" \
+        	#zenity --title="Atenção" \
+       	       # --info --text="\n  Atualização disponivel.\n" \
 		source atualizar
-		bash /usr/riso/riso
+
 		exit
 	else
 		echo "#Versão já é a mais recente"
@@ -77,9 +77,10 @@ then
 		echo "99"
 		sleep 2
 		echo "#Iniciando..."
+		
 	fi
 
-) | zenity --progress --text="Atualização RISO" --auto-close
+) | zenity --progress --width=400 --text="Atualização RISO" --auto-close
 		
 
 }
