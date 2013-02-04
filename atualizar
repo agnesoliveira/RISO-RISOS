@@ -3,5 +3,6 @@ git clone -b develop http://github.com/gabrieldutra/RISO
 sleep 3
 echo "#Executando instalação"
 cd RISO
-./install
 echo "100"
+./install
+
