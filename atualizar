@@ -1,4 +1,9 @@
-echo "#Testando contato com barra de progresso"
+echo "#Baixando a mais recente versão do riso"
+git clone -b develop http://github.com/gabrieldutra/RISO
+sleep 3
+echo "#Executando instalação"
+cd RISO
+./install
 echo "70"
 sleep 2
 echo "100"
