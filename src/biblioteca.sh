@@ -67,7 +67,7 @@ then
 		#Menssagem de atualizado com sucesso.
         	zenity --title="Atenção" \
        	        --info --text="\n  Atualização disponivel.\n" \
-		
+		source atualizar
 		bash /usr/riso/riso
 		exit
 	else
