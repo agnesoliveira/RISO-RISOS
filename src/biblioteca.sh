@@ -74,7 +74,7 @@ then
 		echo "#Versão já é a mais recente"
 
 		log "Esta já é a versão mais nova."
-		echo "50"
+		echo "99"
 		sleep 2
 		echo "#Iniciando..."
 	fi
