@@ -41,6 +41,16 @@ instala_riso() {
     cp ./src/riso /usr/riso/riso
     chmod +x /usr/riso/riso
     cp ./conf/riso.conf /usr/riso/riso.conf
+
+
+    	if [ -e /usr/riso/risoservice ]
+	then 
+		echo "Arquivo que mostra qual o nome do serviço do riso já existe."
+	else
+		nome_servico=_RISOdecom._tcp
+		echo "Criando arquivo com o nome do serviço do riso..."
+		echo "nome_servico=${nome_servico}" > /usr/riso/risoservice
+	fi
     
     echo "Sistema instalado com sucesso."
     echo "Tente digitar 'riso' para iniciar."
@@ -82,7 +92,6 @@ instala_risos() {
     
     #Pega partições
     partrec=`df -T | awk 'NR==2{print $1}'`
-#    partwindows=`os-prober | grep Windows | cut -d':' -f1`
     partwindows=`blkid | grep ntfs | head -n1 | awk -F: {'print $1'}`
     partwindows2=`blkid | grep ntfs | grep -v ${partwindows} | head -n1 | awk -F: {'printf $1'}`	
     partlinux=`os-prober | grep linux | cut -d':' -f1`
@@ -103,72 +112,46 @@ instala_risos() {
     rm -f /etc/grub.d/20_memtest86+
     mv /etc/grub.d/10_linux /etc/grub.d/50_linux
     update-grub
-    
-    #Cria riso.service
- #   echo "Criando arquivo de configuração..."
- #   echo '<?xml version="1.0" standalone="no"?><!--*-nxml-*-->' > /etc/avahi/services/riso.service
- #   echo '<!DOCTYPE service-group SYSTEM "avahi-service.dtd">' >> /etc/avahi/services/riso.service
- #   echo '' >> /etc/avahi/services/riso.service
- #   echo '<!--riso.service -->' >> /etc/avahi/services/riso.service
- #   echo '' >> /etc/avahi/services/riso.service
- #   echo '<!--' >> /etc/avahi/services/riso.service
- #   echo '  Arquivo com as variáveis de configuração do riso.' >> /etc/avahi/services/riso.service
- #   echo '  Essas variáveis são usadas para efetuar a comunicação do servidor riso(risos) com os cliente(riso).' >> /etc/avahi/services/riso.service
- #   echo '  Para mais informações sobre o processo ver http://avahi.org' >> /etc/avahi/services/riso.service
- #   echo '-->' >> /etc/avahi/services/riso.service
- #   echo '' >> /etc/avahi/services/riso.service
- #   echo '<service-group>' >> /etc/avahi/services/riso.service
- #   echo '  <name>Servidor RISO</name>' >> /etc/avahi/services/riso.service
- #   echo '' >> /etc/avahi/services/riso.service
- #   echo '  <service>' >> /etc/avahi/services/riso.service
- #   echo '    <!--Nome do serviço-->' >> /etc/avahi/services/riso.service
- #   echo "    <type>_RISOdecom._tcp</type>" >> /etc/avahi/services/riso.service
- #   echo '' >> /etc/avahi/services/riso.service
- #   echo '    <!--Campo não é usado-->' >> /etc/avahi/services/riso.service
- #   echo '    <port>1234</port>' >> /etc/avahi/services/riso.service
- #   echo '' >> /etc/avahi/services/riso.service
- #   echo '    <!--Variáveis com sistema de arquivo das partições-->' >> /etc/avahi/services/riso.service
- #   echo "    <txt-record>sa_partrec=${sa_partrec}</txt-record>" >> /etc/avahi/services/riso.service
- #   echo "    <txt-record>sa_partlinux=${sa_partlinux}</txt-record>" >> /etc/avahi/services/riso.service
- #   echo "    <txt-record>sa_partwindows=${sa_partwindows}</txt-record>" >> /etc/avahi/services/riso.service
- #   echo "    <txt-record>sa_partwindows2=${sa_partwindows2}</txt-record>" >> /etc/avahi/services/riso.service
- #   echo '' >> /etc/avahi/services/riso.service
- #   echo '    <!--Variáveis com tamanho das imagens geradas no servidor-->' >> /etc/avahi/services/riso.service
- #   echo '    <txt-record>tamlinux=123456789</txt-record>' >> /etc/avahi/services/riso.service
- #   echo '    <txt-record>tamwindows=123456789</txt-record>' >> /etc/avahi/services/riso.service
- #   echo '' >> /etc/avahi/services/riso.service
- #   echo '    <!--Localização dos sistemas operacionais no HD-->' >> /etc/avahi/services/riso.service
- #   echo "    <txt-record>partswap=${partswap}</txt-record>" >> /etc/avahi/services/riso.service
- #   echo "    <txt-record>partrec=${partrec}</txt-record>" >> /etc/avahi/services/riso.service
- #   echo "    <txt-record>partlinux=${partlinux}</txt-record>" >> /etc/avahi/services/riso.service
- #   echo "    <txt-record>partwindows=${partwindows}</txt-record>" >> /etc/avahi/services/riso.service
- #   echo "    <txt-record>partwindows2=${partwindows2}</txt-record>" >> /etc/avahi/services/riso.service
- #   echo '' >> /etc/avahi/services/riso.service
- #   echo '  </service>' >> /etc/avahi/services/riso.service
- #   echo '</service-group>' >> /etc/avahi/services/riso.service
+     
+	#Cria arquivo de configuração com as variáveis se ainda não existir
+	if [ -e /usr/riso/riso.vars ]
+	then 
+		echo "Arquivo de configuração já existe e não será recriado."
+	else
+		echo "Criando arquivo de configuração..."
+		echo "#Arquivo que contém as váriaveis que o riso usa (Automaticamente baixado do servidor risos) " > /usr/riso/riso.vars
+		echo "" >> /usr/riso/riso.vars
+		echo "# Variáveis com sistema de arquivo das partições" >> /usr/riso/riso.vars
+		echo "sa_partrec=${sa_partrec}" >> /usr/riso/riso.vars
+		echo "sa_partlinux=${sa_partlinux}" >> /usr/riso/riso.vars
+		echo "sa_partwindows=${sa_partwindows}" >> /usr/riso/riso.vars
+		echo "sa_partwindows2=${sa_partwindows2}" >> /usr/riso/riso.vars
+		echo "" >> /usr/riso/riso.vars
+		echo "# Variáveis com tamanho das imagens geradas no servidor" >> /usr/riso/riso.vars
+		echo "tamlinux=123456789" >> /usr/riso/riso.vars
+		echo "tamwindows=123456789" >> /usr/riso/riso.vars
+		echo "tamwindows2=123456789" >> /usr/riso/riso.vars
+		echo "" >> /usr/riso/riso.vars
+		echo "# Localização dos sistemas operacionais no HD" >> /usr/riso/riso.vars
+		echo "partswap=${partswap}" >> /usr/riso/riso.vars
+		echo "partrec=${partrec}" >> /usr/riso/riso.vars
+		echo "partlinux=${partlinux}" >> /usr/riso/riso.vars
+		echo "partwindows=${partwindows}" >> /usr/riso/riso.vars
+		echo "partwindows2=${partwindows2}" >> /usr/riso/riso.vars
+	fi
 
 
-#Cria arquivo de configuração com as variáveis
-echo "Criando arquivo de configuração..."
-echo "#Arquivo que contém as váriaveis que o riso usa (Automaticamente baixado do servidor risos) " > /usr/riso/riso.vars
-echo "" >> /usr/riso/riso.vars
-echo "# Variáveis com sistema de arquivo das partições" >> /usr/riso/riso.vars
-echo "sa_partrec=${sa_partrec}" >> /usr/riso/riso.vars
-echo "sa_partlinux=${sa_partlinux}" >> /usr/riso/riso.vars
-echo "sa_partwindows=${sa_partwindows}" >> /usr/riso/riso.vars
-echo "sa_partwindows2=${sa_partwindows2}" >> /usr/riso/riso.vars
-echo "" >> /usr/riso/riso.vars
-echo "# Variáveis com tamanho das imagens geradas no servidor" >> /usr/riso/riso.vars
-echo "tamlinux=123456789" >> /usr/riso/riso.vars
-echo "tamwindows=123456789" >> /usr/riso/riso.vars
-echo "tamwindows2=123456789" >> /usr/riso/riso.vars
-echo "" >> /usr/riso/riso.vars
-echo "# Localização dos sistemas operacionais no HD" >> /usr/riso/riso.vars
-echo "partswap=${partswap}" >> /usr/riso/riso.vars
-echo "partrec=${partrec}" >> /usr/riso/riso.vars
-echo "partlinux=${partlinux}" >> /usr/riso/riso.vars
-echo "partwindows=${partwindows}" >> /usr/riso/riso.vars
-echo "partwindows2=${partwindows2}" >> /usr/riso/riso.vars
+	if [ -e /usr/riso/risoservice ]
+	then 
+		echo "Arquivo que mostra qual o nome do serviço do riso já existe."
+		echo "Caso seja necessário trocar, edite manualmente o arquivo /usr/riso/risoservice."
+	else
+		nome_servico=_RISOdecom._tcp
+		echo "Criando arquivo com o nome do serviço do riso..."
+		echo "nome_servico=${nome_servico}" > /usr/riso/risoservice
+	fi
+	 
+	
     
        
     # preinst script for remastersys
