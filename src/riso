@@ -4,6 +4,7 @@
 dir_riso=/usr/riso
 dir_img=$dir_riso/imagens
 img_win=$dir_img/windows.img
+img_win2=$dir_img/windows2.img
 img_lin=$dir_img/linux.tar
 img_rec=$dir_img/rec.tar
 tor_win=$img_win.torrent
@@ -15,7 +16,7 @@ riso_part=$dir_riso/riso.part
 arq_log=$dir_riso/riso.log
 arq_var=$dir_riso/riso.vars
 biblioteca=$dir_riso/biblioteca.sh
-nome_servico=_RISOdecom._tcp
+source $dir_riso/risoservice
 
 
 #inclui a biblioteca de funções
@@ -41,21 +42,7 @@ carrega_variaveis() {
     fi
 
 (scp -o StrictHostKeyChecking=no root@${servidor}:${arq_var} ${arq_var} && sleep 2; source $arq_var) || echo "Não foi possível carregar arquivo com variáveis"
-
-#    partwindows=`(cut -d ';' -f10 | cut -d '"' -f2 | cut -d '=' -f2) <<< ${avahi_saida}` #Partição com Windows.
-#    partlinux=`(cut -d ';' -f10 | cut -d '"' -f4 | cut -d '=' -f2) <<< ${avahi_saida}` #Partição com Linux.
-#    partrec=`(cut -d ';' -f10 | cut -d '"' -f6 | cut -d '=' -f2) <<< ${avahi_saida}` #Partição de Recuperação.
-#    partswap=`(cut -d ';' -f10 | cut -d '"' -f8 | cut -d '=' -f2) <<< ${avahi_saida}` #Partição Swap.
-
-    #Tamanho total das imagens criadas no servidor.
-#    tamwindows=`(cut -d ';' -f10 | cut -d '"' -f10 | cut -d '=' -f2) <<< ${avahi_saida}`
-#    tamlinux=`(cut -d ';' -f10 | cut -d '"' -f12 | cut -d '=' -f2) <<< ${avahi_saida}`
-source $arq_var
-    #Sistema de arquivo das partições.
-#    sa_partwindows=`(cut -d ';' -f10 | cut -d '"' -f14 | cut -d '=' -f2) <<< ${avahi_saida}`
-#    sa_partlinux=`(cut -d ';' -f10 | cut -d '"' -f16 | cut -d '=' -f2) <<< ${avahi_saida}`
-#    sa_partrec=`(cut -d ';' -f10 | cut -d '"' -f18 | cut -d '=' -f2) <<< ${avahi_saida}`
-    
+  
     #Atualiza arquivo de variaveis.
     echo 'partwindows='$partwindows > $riso_part
     echo 'partlinux='$partlinux >> $riso_part
@@ -220,96 +207,6 @@ verificai(){
 	        reboot
 	    fi
 
-}
-
-#Baixa imagens do Linux e do Windows.
-baixa_imagens() {
-	log "Iniciando download do Linux e do Windows."
-	log "Conectando ao servidor."
-	echo "Conectando ao servidor..."
-	carrega_variaveis || return 1
-
-    #Vefifica se imagem do windows já é a mais recente
-	sizelocwin="0"
-	[ -e ${img_win} ] && sizelocwin=$(du ${img_win} | cut -f1 )
-	if [ "$sizelocwin" = "$tamwindows" ]; then
-            zenity --title="Atenção" \
-       	    --warning --text="A imagem do Windows no computador já é a mais recente." \
-
-	log "ERRO: Imagem do Windows já é a mais recente."
-        return 4
-    fi
-
-    #Vefifica se imagem do linux já é a mais recente
-	sizeloclin="0"
-	[ -e ${img_lin} ] && sizeloclin=$(du ${img_lin} | cut -f1)
-	if [ "$sizeloclin" = "$tamlinux" ]; then
-            zenity --title="Atenção" \
-       	    --warning --text="\n A imagem do Linux no computador já é a mais recente." \
-
-	log "ERRO: Imagem do Linux já é a mais recente."
-        return 4
-    fi
-
-	#Deleta imagens antigas.
-	log "Iniciando remoção da imagem antiga do Windows."
-	echo "Removendo imagem antiga do Windows..."
-	rm -f $img_win
-	rm -f $tor_win
-	log "Fim da remoção da imagem antiga do Windows."
-	log "Inicio da remoção da imagem antiga do Linux."
-	echo "Removendo imagem antiga do Linux..."
-	rm -f $img_lin
-	rm -f $tor_lin
-	log "Fim da remoção da imagem antiga do Linux."
-	
-	#Inicia download das imagens em terminal virtual.
-	log "Iniciando download dos torrent do Windows."
-	(scp -o StrictHostKeyChecking=no root@${servidor}:${tor_win} ${tor_win} && log "Torrent do Windows baixado com sucesso.") || log "ERRO: Torrent do Windows não foi baixado."
-	log "Iniciando download do torrent do Linux."
-	(scp -o StrictHostKeyChecking=no root@${servidor}:${tor_lin} ${tor_lin} && log "Torrent do Linux baixado com sucesso.") || log "ERRO: Torrent do Linux não foi baixado."
-	cd ${dir_img}
-	log "Iniciando download das imagens do Windows e do Linux."
-	screen -d -m rtorrent ${tor_win} ${tor_lin}
-
-    	#Se usuário cancelar volta para menu.
-	trap "killall rtorrent; exit" 2 15
-
-	# Loop que aguarda o torrent ser concluido.
-	# Compara o tamanho do arquivo que esta sendo baixado pelo rtorrent
-	# com o tamanho total no arquivo riso.service.
-	(
-	    sizelocwin="0"
-	    sizeloclin="0"
-	    total=$((tamwindows+tamlinux))
-	    while [ "$sizelocwin" -lt "$tamwindows" -o "$sizeloclin" -lt "$tamlinux" ]; do
-	
-		    # quanto já foi copiado?
-		    [ -e ${img_win} ] && sizelocwin=$(du ${img_win} | cut -f1)
-		    [ -e ${img_lin} ] && sizeloclin=$(du ${img_lin} | cut -f1)
-	            copiado=$((sizelocwin+sizeloclin))
-
-		    # qual a porcentagem do total?
-		    PORCENTAGEM=$((copiado*100/total))
-		
-		    # envia a porcentagem para o zenity
-		    echo $PORCENTAGEM
-		
-		    # aguarda até a próxima checagem
-		    sleep 3
-	    done	
-
-	    # cópia finalizada, mostra a porcentagem final
-	    echo 100
-	    log "Download das imagens do Windows e Linux finalizado."
-	    sleep 30
-	
-    ) | zenity --progress --title="Baixando imagens..." --text="Baixando imagens do Windows e Linux do servidor RISOS para maquina local" --auto-close
-
-	log "Finalizando rtorrent."
-	#Finaliza download
-	killall rtorrent
-	
 }
 
 #Baixa imagem do Windows.
@@ -611,16 +508,8 @@ instala_linux &&\
 ilinux=1;
 fi
 
-#Se instalou qualquer uma das imagens verifica se no arquivo tem 
+#Se instalou qualquer uma das imagens verifica se vai desligar ou reiniciar 
 [[ $iwindows == 1 || $iwindows2 == 1 || $ilinux == 1 ]] && verificai
-
-        # De acordo com a opção escolhida, executa funcoes
-
-        #case $opcao in
-   #             "Windows") instala_windows;;
-   #             "Linux") instala_linux;;
-    #            "Windows|Linux") instala;;
-    #    esac
 
 }
 
@@ -661,15 +550,9 @@ fi
 [[ $iwindows2 == 1 ]] && instala_windows2
 [[ $ilinux == 1 ]] && instala_linux
 
-#Se instalou qualquer uma das imagens verifica se no arquivo tem 
+#Se instalou qualquer uma das imagens verifica se vai desligar ou reiniciar
 [[ $iwindows == 1 || $iwindows2 == 1 || $ilinux == 1 ]] && verificai
 
-#	case $opcao in
-#		"Windows") baixa_imagem_windows && instala_windows;;
-#		"Linux") baixa_imagem_linux && instala_linux;;
-#		"Windows|Linux") baixa_imagens && instala;;
-#	esac
-	
 }
 
 #Menu principal.
