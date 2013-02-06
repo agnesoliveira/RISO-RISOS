@@ -20,35 +20,37 @@ creditos() {
 
         zenity \
         --info \
-        --title 'Creditos' \
-        --text='                                       \n
-                 CENTRO FEDERAL DE EDUCAÇAO TECNOLOGICA  \n
-                        Engenharia da Computaçao         \n
-                                                         \n
-                      Cristiano Goulart Lopes Dias       \n
-                    Vinicius Tinti de Paula Oliveira     \n
-                       Germano Teixeira de Miranda       \n
-                        Gabriel de Souza Brandao         \n
-                         Marcio J. Menezes Jr.           \n
-                    Gabriel Machado de Castro Fonseca    \n
-                      André Luiz Silveira Herculano      \n
-                                                         \n
-                    Atualizado por:                      \n
-                            Agnes Oliveira	         \n
-                          Gabriel Dutra Dias              \n
-                      Marcela Leticia C. Januario         \n
-                           Thais Diniz Braz               \n
-                                                         \n
-                           www.dgo.cefetmg.br            \n
-                                                         \n'\
-
-
+        --no-wrap \
+	--title 'Creditos' \
+        --text=' \n
+	CENTRO FEDERAL DE EDUCAÇAO TECNOLOGICA \n
+		Engenharia da Computaçao \n
+						
+		Cristiano Goulart Lopes Dias \n
+		Vinicius Tinti de Paula Oliveira \n
+		Germano Teixeira de Miranda \n
+		Gabriel de Souza Brandao \n
+		Marcio J. Menezes Jr. \n
+		Gabriel Machado de Castro Fonseca \n
+		André Luiz Silveira Herculano \n
+		
+		Atualizado por: \n
+			Agnes Oliveira \n
+			Gabriel Dutra Dias \n
+			Marcela Leticia C. Januario \n
+			Thais Diniz Braz \n
+							\n
+		Agradecimentos: \n
+			Pedro Andre \n
+			Por fazer esse projeto acontecer \n
+							\n
+			www.decom.cefetmg.br \n'
 }
 
 #Atualiza R.I.S.O.
 atualiza() {
 (
-	versaoariso=0
+	versaoatual=0
 	log "Verificando atualizações"
 	echo "#Verificando atualizações"
 	rm -rf tmp
@@ -62,13 +64,12 @@ atualiza() {
 	cd RISO
 	sleep 1
 	source att
-	if [ $versaoriso -gt $versaoariso ]
+	if [ $versaoriso -gt $versaoatual ]
 then
 		#Menssagem de atualizado com sucesso.
         	#zenity --title="Atenção" \
        	       # --info --text="\n  Atualização disponivel.\n" \
 		source atualizar
-
 		exit
 	else
 		echo "#Versão já é a mais recente"
@@ -93,7 +94,7 @@ que esta fazendo pare agora.\nDeseja continuar?"
 
     if [ "$?" -eq "0" ]; then
 		log "Iniciando configuração manual do arquivo de configuração."
-		nano $riso_conf
+		gedit $riso_conf
 		log "Finalizada a edição manual do arquivo de configuração."		
 	fi
 
