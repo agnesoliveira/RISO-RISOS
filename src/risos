@@ -17,7 +17,7 @@ tab_part=$dir_img/tab_part
 riso_part=$dir_riso/riso.part
 arq_log=$dir_riso/riso.log
 biblioteca=$dir_riso/biblioteca.sh
-nome_servico=_RISOdecom._tcp
+source $dir_riso/risoservice
 
 #inclui a biblioteca de funções
 source $biblioteca
@@ -58,23 +58,6 @@ source $arq_var
     echo '    <!--Campo não é usado-->' >> /etc/avahi/services/riso.service
     echo '    <port>1234</port>' >> /etc/avahi/services/riso.service
     echo '' >> /etc/avahi/services/riso.service
-#    echo '    <!--Variáveis com sistema de arquivo das partições-->' >> /etc/avahi/services/riso.service
-#   echo "    <txt-record>sa_partrec=${sa_partrec}</txt-record>" >> /etc/avahi/services/riso.service
-#  echo "    <txt-record>sa_partlinux=${sa_partlinux}</txt-record>" >> /etc/avahi/services/riso.service
-#    echo "    <txt-record>sa_partwindows=${sa_partwindows}</txt-record>" >> /etc/avahi/services/riso.service
-#    echo "    <txt-record>sa_partwindows2=${sa_partwindows2}</txt-record>" >> /etc/avahi/services/riso.service
-#    echo '' >> /etc/avahi/services/riso.service
-#   echo '    <!--Variáveis com tamanho das imagens geradas no servidor-->' >> /etc/avahi/services/riso.service
-#    echo '    <txt-record>tamlinux=123456789</txt-record>' >> /etc/avahi/services/riso.service
-#    echo '    <txt-record>tamwindows=123456789</txt-record>' >> /etc/avahi/services/riso.service
-#    echo '' >> /etc/avahi/services/riso.service 
-#    echo '    <!--Localização dos sistemas operacionais no HD-->' >> /etc/avahi/services/riso.service
-#    echo "    <txt-record>partswap=${partswap}</txt-record>" >> /etc/avahi/services/riso.service
-#    echo "    <txt-record>partrec=${partrec}</txt-record>" >> /etc/avahi/services/riso.service
-#    echo "    <txt-record>partlinux=${partlinux}</txt-record>" >> /etc/avahi/services/riso.service
-#    echo "    <txt-record>partwindows=${partwindows}</txt-record>" >> /etc/avahi/services/riso.service
-#    echo "    <txt-record>partwindows2=${partwindows2}</txt-record>" >> /etc/avahi/services/riso.service
-#    echo '' >> /etc/avahi/services/riso.service
     echo '  </service>' >> /etc/avahi/services/riso.service
     echo '</service-group>' >> /etc/avahi/services/riso.service
 
@@ -87,24 +70,6 @@ source $arq_var
         log "ERRO: Servidor não encontrado na rede."
         exit 1
     fi
-
-
-
-
-
-#    partwindows=`(cut -d ';' -f10 | cut -d '"' -f2 | cut -d '=' -f2) <<< ${avahi_saida}` #Partição com Windows.
-#   partlinux=`(cut -d ';' -f10 | cut -d '"' -f4 | cut -d '=' -f2) <<< ${avahi_saida}` #Partição com Linux.
-#  partrec=`(cut -d ';' -f10 | cut -d '"' -f6 | cut -d '=' -f2) <<< ${avahi_saida}` #Partição de Recuperação.
-#    partswap=`(cut -d ';' -f10 | cut -d '"' -f8 | cut -d '=' -f2) <<< ${avahi_saida}` #Partição Swap.
-
-    #Tamanho total das imagens criadas no servidor.
-#    tamwindows=`(cut -d ';' -f10 | cut -d '"' -f10 | cut -d '=' -f2) <<< ${avahi_saida}`
-#    tamlinux=`(cut -d ';' -f10 | cut -d '"' -f12 | cut -d '=' -f2) <<< ${avahi_saida}`
-
-    #Sistema de arquivo das partições.
-#    sa_partwindows=`(cut -d ';' -f10 | cut -d '"' -f14 | cut -d '=' -f2) <<< ${avahi_saida}`
-#   sa_partlinux=`(cut -d ';' -f10 | cut -d '"' -f16 | cut -d '=' -f2) <<< ${avahi_saida}`
-#    sa_partrec=`(cut -d ';' -f10 | cut -d '"' -f18 | cut -d '=' -f2) <<< ${avahi_saida}`
     
     #Atualiza arquivo de variaveis.
     echo 'partwindows='$partwindows > $riso_part
@@ -176,62 +141,6 @@ fi
 	
 }
 
-#Inicia tracker para disponibilizar imagem do Windows na rede.
-inicia_servidor_windows() {
-
-	if [ -e ${img_win} ]; then
-    	log "Tracker iniciado para Windows."
-		bttrack --port 6969 --dfile dstate | grep laialadaiasabadanaavemaria &
-		cd ${dir_img}
-		rtorrent ${tor_win}
-		log "Tracker finalizado para Windows."
-	else
-	        zenity --title="Atenção" \
-                --warning --text="Você ainda não criou a imagem do windows!"
-
-		log "ERRO: Ao iniciar tracker para Windows, Não existe imagem pronta."
-		return 2
-	fi
-	
-}
-
-inicia_servidor_windows2() {
-
-	if [ -e ${img_win} ]; then
-    	log "Tracker iniciado para Windows."
-		bttrack --port 6969 --dfile dstate | grep laialadaiasabadanaavemaria &
-		cd ${dir_img}
-		rtorrent ${tor_win2}
-		log "Tracker finalizado para Windows."
-	else
-	        zenity --title="Atenção" \
-                --warning --text="Você ainda não criou a imagem do windows!"
-
-		log "ERRO: Ao iniciar tracker para Windows, Não existe imagem pronta."
-		return 2
-	fi
-	
-}
-
-#Inicia tracker para disponibilizar imagem do Linux na rede.
-inicia_servidor_linux() {
-
-	if [ -e ${img_lin} ]; then
-	    log "Tracker iniciado para Linux."
-		bttrack --port 6969 --dfile dstate | grep laialadaiasabadanaavemaria &
-		cd ${dir_img}		
-		rtorrent ${tor_lin}
-		log "Tracker finalizado para Linux."
-	else
-	        zenity --title="Atenção" \
-                --warning --text="Você ainda não criou a imagem do Linux!"
-
-		log "ERRO: Ao iniciar tracker para o Linux, Não existe imagem pronta."
-		return 2
-	fi
-
-}
-
 #Cria imagem do Linux.
 cria_linux() {
 
@@ -286,7 +195,7 @@ cria_windows() {
 	log "Criando imagem do Windows."
 	echo "Removendo imagem antiga do windows..."
 	rm -f ${img_win}
-    rm -f ${tor_win}
+    	rm -f ${tor_win}
 
     #Cria arquivo .img do windows
     umount ${partwindows} 2> /dev/null
@@ -312,6 +221,27 @@ pode estar incorreta.\n" \
 	
 }
 
+
+#Cria arquivo .torrent para imagem do linux.
+cria_torrent_windows() {
+	
+	if [ -e ${img_win} ]; then
+	    log "Criando arquivo torrent do windows."
+        btmakemetafile.bittorrent ${img_win} http://${servidor}:6969/announce 2> /dev/null
+
+        #Escreve o tamanho da imagem no riso.service
+	    tam=`du ${img_win} | cut -f1`
+        sed "s/tamwindows=[0-9]*/tamwindows=${tam}/" < ${arq_var} > ${arq_var}.tmp
+	    mv ${arq_var}.tmp ${arq_var}
+	    log "Arquivo torrent do windows criado."
+    else
+  	    zenity --title="Atenção" \
+            --warning --text="Você ainda não criou a imagem do Windows!"
+       
+	    log "ERRO: Ao criar torrent do Windows, não existe imagem pronta."
+            return 2
+    fi
+}
 
 
 #Cria arquivo .torrent para imagem do linux.
@@ -368,26 +298,6 @@ pode estar incorreta.\n" \
 }
 
 
-#Cria arquivo .torrent para imagem do linux.
-cria_torrent_windows() {
-	
-	if [ -e ${img_win} ]; then
-	    log "Criando arquivo torrent do windows."
-        btmakemetafile.bittorrent ${img_win} http://${servidor}:6969/announce 2> /dev/null
-
-        #Escreve o tamanho da imagem no riso.service
-	    tam=`du ${img_win} | cut -f1`
-        sed "s/tamwindows=[0-9]*/tamwindows=${tam}/" < ${arq_var} > ${arq_var}.tmp
-	    mv ${arq_var}.tmp ${arq_var}
-	    log "Arquivo torrent do windows criado."
-    else
-  	    zenity --title="Atenção" \
-            --warning --text="Você ainda não criou a imagem do Windows!"
-       
-	    log "ERRO: Ao criar torrent do Windows, não existe imagem pronta."
-            return 2
-    fi
-}
 
 #Cria imagem do SO com R.I.S.O. instalado.
 cria_rec() {
@@ -1040,16 +950,10 @@ opcao=""
 	opcao=$(zenity --width=400 --height=400 --text="Quais imagens deseja disponibilizar?" --list --checklist --column " " --column "Opcoes" TRUE Windows1 $win2 TRUE Linux)
 	# De acordo com a opção escolhida, executa funcoes
 	inicia_servidor $opcao
-	#case $opcao in
-	#	"Windows") inicia_servidor_windows;;
-	#	"Linux") inicia_servidor_linux;;
-	#	"Windows|Linux") inicia_servidor;;
-	#esac
-	
 }
 
 #Checklist de seleção.
- menu_criar_imagens() {
+menu_criar_imagens() {
 source $arq_var
 win2=""
 if [ $partwindows2 ]
@@ -1089,19 +993,7 @@ cria_recuperacao &&\
 arec=1;
 fi
 
-[[ $awindows == 1 && $awindows2 == 1 && $alinux == 1 && $arec=1 ]] && imagens_criadas
-
-    # De acordo com a opção escolhida, executa funcoes
-#    case $opcao in
- #       "Windows") cria_windows && cria_torrent_windows && windows_criado;;
-  #      "Linux") cria_linux && cria_torrent_linux && linux_criado;;
-   #     "Recuperacao") cria_rec && rec_criado;;
-    #    "Linux|Windows") cria_windows && cria_torrent_windows && cria_linux && cria_torrent_linux && imagens_criadas;;
-     #   "Windows|Recuperacao") cria_rec && cria_windows && cria_torrent_windows && imagens_criadas;;
-      #  "Linux|Recuperacao") cria_rec && cria_linux && cria_torrent_linux && imagens_criadas;;
-       # "Linux|Windows|Recuperacao") cria_rec && cria_windows && cria_torrent_windows && cria_linux && cria_torrent_linux && imagens_criadas;;
-    #esac
-    
+[[ $awindows == 1 && $awindows2 == 1 && $alinux == 1 && $arec=1 ]] && imagens_criadas   
 } 
 
 #Checklist de seleção.
@@ -1139,14 +1031,6 @@ alinux=1;
 fi
 
 [[ $awindows == 1 && $awindows2 == 1 && $alinux == 1 ]] && torrents_criados
-
-    # De acordo com a opção escolhida, executa funcoes
-#	case $opcao in
-#		"Windows") cria_torrent_windows && torrent_windows_criado;;
-#		"Linux") cria_torrent_linux && torrent_linux_criado;;
-#		"Windows|Linux") cria_torrent_windows && cria_torrent_linux && torrents_criados;;
-#	esac
-	
 }
 
 #Menu pricipal.
