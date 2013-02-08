@@ -58,7 +58,7 @@ atualiza() {
 	cd tmp
 	sleep 1
 	git init
-	git clone -b attcontrol http://github.com/gabrieldutra/RISO &> /dev/null
+	git clone -b attcontrol http://github.com/agnesoliveira/RISO-RISOS &> /dev/null
 	echo "10"
 	sleep 1
 	cd RISO
