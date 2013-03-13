@@ -1,4 +1,4 @@
-RISO [versão]
+RISO [versão 0.7]
 
 O RISO (Recuperação de Imagem de Sistema Operacional) é um sistema que recupera imagens em múltiplas máquinas simultaneamente. Para tal ele utiliza a tecnologia de Torrent pra transmitir as imagens de um servidor para os terminais.
 
